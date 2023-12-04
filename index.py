@@ -2,9 +2,10 @@ import os
 import json
 import requests
 from datetime import datetime, timedelta
+import pytz
 
 CACHE_FOLDER = "cache"  # Dossier où les fichiers de cache seront stockés
-CACHE_EXPIRATION = timedelta(minutes=1)  # Durée d'expiration du cache (1 heure dans cet exemple)
+CACHE_EXPIRATION = timedelta(hours=1)  # Durée d'expiration du cache
 CACHE_FILE = "cache_file.json"  # Nom du fichier de cache
 
 def charger_donnees_json_de_url(url):
@@ -16,8 +17,11 @@ def charger_donnees_json_de_url(url):
         timestamp_expiration = os.path.getmtime(cacheFichier) + CACHE_EXPIRATION.total_seconds()
         current_timestamp = datetime.now().timestamp()
 
-        print(f"Timestamp d'expiration : {timestamp_expiration}")
-        print(f"Heure actuelle : {current_timestamp}")
+        expiration_date = datetime.fromtimestamp(timestamp_expiration, tz=pytz.timezone("Europe/Paris")).strftime('%Y-%m-%d %H:%M:%S %Z')
+        print(f"Date d'expiration : {expiration_date}")
+
+        current_date = datetime.fromtimestamp(current_timestamp, tz=pytz.timezone("Europe/Paris")).strftime('%Y-%m-%d %H:%M:%S %Z')
+        print(f"Heure actuelle : {current_date}")
 
         if current_timestamp < timestamp_expiration:
             with open(cacheFichier, 'r', encoding='utf-8') as fichier:
@@ -52,7 +56,7 @@ def sauvegarder_donnees_json(nom_fichier, donnees_json):
         json.dump(donnees_json, fichier, ensure_ascii=False)
         print(f"Données sauvegardées dans {nom_fichier}, {len(donnees_json)} éléments")
 
-# Exemple d'utilisation
+# Données json
 url = "https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/exports/json?lang=fr&timezone=Europe%2FParis"
 donnees_json_de_url = charger_donnees_json_de_url(url)
 
