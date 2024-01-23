@@ -3,6 +3,7 @@ import json
 import requests
 from datetime import datetime, timedelta
 import pytz
+import time
 
 CACHE_FOLDER = "cache"  # Dossier où les fichiers de cache seront stockés
 CACHE_EXPIRATION = timedelta(hours=1)  # Durée d'expiration du cache
@@ -68,29 +69,45 @@ def sauvegarder_donnees_json(nom_fichier, donnees_json):
         json.dump(donnees_json, fichier, ensure_ascii=False)
         print(f"Données sauvegardées dans {nom_fichier}, {len(donnees_json)} éléments")
 
+
 def get_station_info_by_id(station_id):
     url = f"https://api.prix-carburants.2aaz.fr/station/{station_id}"
 
     try:
         response = requests.get(url)
-        data = response.json()
 
         # Vérifier si la requête a réussi
         if response.status_code == 200:
-            # Récupérer le nom de la marque associée
-            brand_info = data.get('Brand', {})
-            brand_name = brand_info.get('name', 'Nom de la marque non disponible')
-            return brand_name
+            # Vérifier si la réponse contient des données JSON
+            if response.text.strip():  # Si la réponse n'est pas vide
+                data = response.json()
+
+                # Récupérer le nom de la marque associée
+                brand_info = data.get('Brand', {})
+                brand_name = brand_info.get('name', 'Nom de la marque non disponible')
+                return brand_name
+            else:
+                print(f"Aucune donnée JSON trouvée dans la réponse pour la station id : {str(station_id)}")
+        elif response.status_code == 429:
+            # Gérer l'erreur 429 en attendant le temps spécifié par l'en-tête Retry-After
+            retry_after = int(response.headers.get('Retry-After', 30))  # Attendre par défaut 30 secondes
+            print(f"Erreur 429 - Trop de requêtes. Attente de {retry_after} secondes., Station id : {str(station_id)} ")
+            time.sleep(retry_after)
+            return get_station_info_by_id(station_id)  # Réessayer après l'attente
         else:
             print(f"Erreur lors de la requête : {response.status_code} ,Station id : {str(station_id)}")
     except Exception as e:
         print(f"Erreur lors de la requête : {str(e)}, Station id : {str(station_id)}")
 
-
 # Charger les données JSON depuis l'URL
 url = "https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/exports/json?lang=fr&timezone=Europe%2FParis"
-donnees_json_de_url = charger_donnees_json_de_url(url)
+# Charger les données JSON depuis l'URL 10 fois avec un intervalle de 10 secondes
+for _ in range(5):
+    donnees_json_de_url = charger_donnees_json_de_url(url)
 
-# Sauvegarder les données mises à jour dans un nouveau fichier
-if donnees_json_de_url:
-    sauvegarder_donnees_json("sortie.json", donnees_json_de_url)
+    # Sauvegarder les données mises à jour dans un nouveau fichier
+    if donnees_json_de_url:
+        sauvegarder_donnees_json("sortie.json", donnees_json_de_url)
+
+    # Ajouter une pause de 10 secondes entre chaque appel
+    time.sleep(10)
