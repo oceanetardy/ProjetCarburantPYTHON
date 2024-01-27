@@ -1,6 +1,7 @@
 import os
 import json
 import requests
+import pandas as pd
 from datetime import datetime, timedelta
 import pytz
 
@@ -38,6 +39,27 @@ def charger_donnees_json_de_url(url):
 
     if reponse.status_code == 200:
         donnees_json = reponse.json()
+
+        # Charger les informations de marque et de nom depuis le fichier CSV
+        stations_with_name_file = "stations_with_name.csv"
+        df = pd.read_csv(stations_with_name_file)
+
+        # Créer un dictionnaire avec les informations de marque et de nom pour chaque ID
+        id_info_dict = {str(row['ID']): {'marque': row['Marque'], 'nom': row['Nom']} for _, row in df.iterrows()}
+
+        # Si les données sont une liste, itérer sur la liste
+        if isinstance(donnees_json, list):
+            for idx, item in enumerate(donnees_json):
+                item_id = str(item['id'])
+                if item_id in id_info_dict:
+                    item.update(id_info_dict[item_id])
+        elif isinstance(donnees_json, dict):
+            # Si les données sont un dictionnaire, itérer sur les valeurs
+            for item in donnees_json.values():
+                item_id = str(item['id'])
+                if item_id in id_info_dict:
+                    item.update(id_info_dict[item_id])
+
         print(f"Données chargées depuis {url}, {len(donnees_json)} éléments")
 
         # Sauvegarder les données dans le cache

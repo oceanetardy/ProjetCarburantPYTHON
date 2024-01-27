@@ -1,29 +1,23 @@
 import pandas as pd
-import requests
+import json
 
-# Fonction pour récupérer le nom depuis l'API en utilisant l'ID
-def get_name_from_api(row):
-    station_id = row['ID']
-    url = f"https://api.prix-carburants.2aaz.fr/station/{station_id}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        brand_name = data.get('Brand', {}).get('name', '')
-        print(f"Row: {row.name}, ID: {station_id}, Brand Name: {brand_name}")
-        return brand_name
+# Charger le fichier JSON
+with open('stations_names.json', 'r', encoding='utf-8') as json_file:
+    data_json = json.load(json_file)
+
+# Charger le fichier CSV contenant les ids du site gouv
+df = pd.read_csv('ids_stations.csv')
+
+# Fonction pour récupérer la marque et le nom en fonction de l'ID
+def get_info_from_json(row):
+    id = str(row['ID'])
+    if id in data_json:
+        return pd.Series([data_json[id]['marque'], data_json[id]['nom']])
     else:
-        error_message = f"Row: {row.name}, Failed to retrieve data for ID: {station_id}, Error: {response.text}"
-        print(error_message)
-        return ''
+        return pd.Series(['', ''])
 
-# Charger le CSV
-csv_path = 'ids_stations.csv'
-df = pd.read_csv(csv_path)
+# Appliquer la fonction pour créer de nouvelles colonnes
+df[['Marque', 'Nom']] = df.apply(get_info_from_json, axis=1)
 
-# Créer une nouvelle colonne 'Brand_Name' et la remplir en utilisant l'API
-df['Brand_Name'] = df.apply(get_name_from_api, axis=1)
-
-# Enregistrez le DataFrame mis à jour dans le même fichier CSV
-df.to_csv(csv_path, index=False)
-
-print("Opération terminée.")
+# Sauvegarder le nouveau DataFrame avec les informations ajoutées dans un nouveau fichier CSV
+df.to_csv('stations_with_name.csv', index=False)
