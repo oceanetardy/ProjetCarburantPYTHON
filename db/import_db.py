@@ -78,21 +78,29 @@ def insert_data_from_json(station_data):
                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', station_values)
 
         # Insertion des services de la station
-        services = json.loads(station_data.get('services', '{}')).get('service', [])
-        for service in services:
-            cursor.execute('''INSERT OR IGNORE INTO Service (nom) VALUES (?)''', (service,))
-            service_id = cursor.lastrowid
-            cursor.execute('''INSERT OR IGNORE INTO Station_Service (station_id, service_id) VALUES (?, ?)''',
-                           (int(station_data['id']), service_id))
+        services_json = station_data.get('services', '{}')
+        if services_json:
+            services = json.loads(services_json).get('service', [])
+            for service in services:
+                cursor.execute('''INSERT OR IGNORE INTO Service (nom) VALUES (?)''', (service,))
+                service_id = cursor.lastrowid
+                cursor.execute('''INSERT OR IGNORE INTO Station_Service (station_id, service_id) VALUES (?, ?)''',
+                               (int(station_data['id']), service_id))
 
         # Insertion des prix des carburants
-        prix_list = json.loads(station_data.get('prix', '[]'))
-        for prix in prix_list:
-            cursor.execute('''INSERT OR IGNORE INTO Carburant (nom) VALUES (?)''', (prix['@nom'],))
-            carburant_id = cursor.lastrowid
-            prix_values = (int(station_data['id']), carburant_id, float(prix['@valeur']), prix['@maj'])
-            cursor.execute('''INSERT OR IGNORE INTO Prix (station_id, carburant_id, prix, maj) VALUES (?, ?, ?, ?)''',
-                           prix_values)
+        prix_json = station_data.get('prix', '[]')
+        if prix_json:
+            prix_list = json.loads(prix_json)
+            for prix in prix_list:
+                if isinstance(prix, dict):  # Vérification si l'élément est un dictionnaire
+                    carburant_nom = prix.get('@nom', '')
+                    carburant_valeur = float(prix.get('@valeur', 0))
+                    maj = prix.get('@maj', '')
+                    cursor.execute('''INSERT OR IGNORE INTO Carburant (nom) VALUES (?)''', (carburant_nom,))
+                    carburant_id = cursor.lastrowid
+                    prix_values = (int(station_data['id']), carburant_id, carburant_valeur, maj)
+                    cursor.execute('''INSERT OR IGNORE INTO Prix (station_id, carburant_id, prix, maj) VALUES (?, ?, ?, ?)''',
+                                   prix_values)
 
         conn.commit()
         print(f"Données pour la station avec l'ID {station_data['id']} insérées avec succès.")
@@ -101,6 +109,8 @@ def insert_data_from_json(station_data):
         conn.rollback()  # Annulation des modifications en cas d'erreur
     finally:
         conn.close()
+
+
 
 with open('cache/cache_file.json', 'r', encoding='utf-8') as file:
     json_data_list = json.load(file)
