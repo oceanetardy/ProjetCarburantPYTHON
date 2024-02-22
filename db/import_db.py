@@ -175,6 +175,23 @@ def update_fuel_prices(cursor):
 
         print("Les IDs de carburants invalides dans la table des prix ont été mis à jour.")
 
+def update_station_services(cursor):
+    cursor.execute("SELECT DISTINCT service_id FROM Station_Service")
+    service_ids = [row[0] for row in cursor.fetchall()]
+
+    cursor.execute("SELECT id FROM Service")
+    valid_service_ids = [row[0] for row in cursor.fetchall()]
+
+    invalid_ids = [id for id in service_ids if id not in valid_service_ids]
+
+    if invalid_ids:
+        print("IDs de services invalides trouvés dans la table Station_Service : ", invalid_ids)
+        for invalid_id in invalid_ids:
+            # Supprimer les entrées de la table Station_Service avec les IDs de service invalides
+            cursor.execute("DELETE FROM Station_Service WHERE service_id=?", (invalid_id,))
+
+        print("Les entrées avec des IDs de services invalides dans la table Station_Service ont été supprimées.")
+
 # Code principal
 with open('cache/cache_file.json', 'r', encoding='utf-8') as file:
     json_data_list = json.load(file)
@@ -188,6 +205,7 @@ for station_data in json_data_list:
 conn = sqlite3.connect('db/stations_data.db')
 cursor = conn.cursor()
 update_fuel_prices(cursor)
+update_station_services(cursor)  # Ajout de la mise à jour des IDs de services invalides
 conn.commit()
 conn.close()
 
