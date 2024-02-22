@@ -18,12 +18,13 @@ def create_tables():
                         region TEXT,
                         code_region TEXT,
                         marque TEXT,
-                        horaires_automate_24_24 TEXT
+                        horaires_automate_24_24 TEXT,
+                        UNIQUE(id)
                     )''')
 
     cursor.execute('''CREATE TABLE IF NOT EXISTS Service (
                         id INTEGER PRIMARY KEY,
-                        nom TEXT
+                        nom TEXT UNIQUE
                     )''')
 
     cursor.execute('''CREATE TABLE IF NOT EXISTS Station_Service (
@@ -36,7 +37,7 @@ def create_tables():
 
     cursor.execute('''CREATE TABLE IF NOT EXISTS Carburant (
                         id INTEGER PRIMARY KEY,
-                        nom TEXT
+                        nom TEXT UNIQUE
                     )''')
 
     cursor.execute('''CREATE TABLE IF NOT EXISTS Prix (
@@ -57,61 +58,89 @@ def insert_data_from_json(station_data):
     cursor = conn.cursor()
 
     try:
+        # Validation des données d'entrée
+        validate_station_data(station_data)
+
+        # Début de la transaction explicite
+        cursor.execute("BEGIN")
+
         # Insertion des données de la station
-        station_values = (
-            int(station_data['id']),
-            station_data.get('nom', ''),
-            station_data.get('adresse', ''),
-            float(station_data.get('latitude', 0)),
-            float(station_data.get('longitude', 0)),
-            station_data.get('cp', ''),
-            station_data.get('ville', ''),
-            station_data.get('departement', ''),
-            station_data.get('code_departement', ''),
-            station_data.get('region', ''),
-            station_data.get('code_region', ''),
-            station_data.get('marque', ''),
-            station_data.get('horaires_automate_24_24', '')
-        )
-        cursor.execute('''INSERT OR IGNORE INTO Station (id, nom, adresse, latitude, longitude, cp, ville, 
-                          departement, code_departement, region, code_region, marque, horaires_automate_24_24) 
-                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', station_values)
+        insert_station_data(cursor, station_data)
 
         # Insertion des services de la station
-        services_json = station_data.get('services', '{}')
-        if services_json:
-            services = json.loads(services_json).get('service', [])
-            for service in services:
-                cursor.execute('''INSERT OR IGNORE INTO Service (nom) VALUES (?)''', (service,))
-                service_id = cursor.lastrowid
-                cursor.execute('''INSERT OR IGNORE INTO Station_Service (station_id, service_id) VALUES (?, ?)''',
-                               (int(station_data['id']), service_id))
+        insert_station_services(cursor, station_data)
 
         # Insertion des prix des carburants
-        prix_json = station_data.get('prix', '[]')
-        if prix_json:
-            prix_list = json.loads(prix_json)
-            for prix in prix_list:
-                if isinstance(prix, dict):  # Vérification si l'élément est un dictionnaire
-                    carburant_nom = prix.get('@nom', '')
-                    carburant_valeur = float(prix.get('@valeur', 0))
-                    maj = prix.get('@maj', '')
-                    cursor.execute('''INSERT OR IGNORE INTO Carburant (nom) VALUES (?)''', (carburant_nom,))
-                    carburant_id = cursor.lastrowid
-                    prix_values = (int(station_data['id']), carburant_id, carburant_valeur, maj)
-                    cursor.execute('''INSERT OR IGNORE INTO Prix (station_id, carburant_id, prix, maj) VALUES (?, ?, ?, ?)''',
-                                   prix_values)
+        insert_fuel_prices(cursor, station_data)
 
+        # Validation de la transaction
         conn.commit()
         print(f"Données pour la station avec l'ID {station_data['id']} insérées avec succès.")
     except Exception as e:
-        print(f"Erreur lors de l'insertion des données pour la station avec l'ID {station_data['id']}: {str(e)}")
-        conn.rollback()  # Annulation des modifications en cas d'erreur
+        # Journalisation des erreurs
+        log_error(f"Erreur lors de l'insertion des données pour la station avec l'ID {station_data['id']}: {str(e)}")
+        # Annulation de la transaction en cas d'erreur
+        conn.rollback()
     finally:
         conn.close()
 
+def validate_station_data(station_data):
+    # Ajoutez ici votre logique de validation des données d'entrée
+    pass
 
+def insert_station_data(cursor, station_data):
+    # Insertion des données de la station
+    station_values = (
+        int(station_data['id']),
+        station_data.get('nom', ''),
+        station_data.get('adresse', ''),
+        float(station_data.get('latitude', 0)),
+        float(station_data.get('longitude', 0)),
+        station_data.get('cp', ''),
+        station_data.get('ville', ''),
+        station_data.get('departement', ''),
+        station_data.get('code_departement', ''),
+        station_data.get('region', ''),
+        station_data.get('code_region', ''),
+        station_data.get('marque', ''),
+        station_data.get('horaires_automate_24_24', '')
+    )
+    cursor.execute('''INSERT OR IGNORE INTO Station (id, nom, adresse, latitude, longitude, cp, ville, 
+                      departement, code_departement, region, code_region, marque, horaires_automate_24_24) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', station_values)
 
+def insert_station_services(cursor, station_data):
+    # Insertion des services de la station
+    services_json = station_data.get('services', '{}')
+    if services_json:
+        services = json.loads(services_json).get('service', [])
+        for service in services:
+            cursor.execute('''INSERT OR IGNORE INTO Service (nom) VALUES (?)''', (service,))
+            service_id = cursor.lastrowid
+            cursor.execute('''INSERT OR IGNORE INTO Station_Service (station_id, service_id) VALUES (?, ?)''',
+                           (int(station_data['id']), service_id))
+
+def insert_fuel_prices(cursor, station_data):
+    # Insertion des prix des carburants
+    prix_json = station_data.get('prix', '[]')
+    if prix_json:
+        prix_list = json.loads(prix_json)
+        for prix in prix_list:
+            if isinstance(prix, dict):  # Vérification si l'élément est un dictionnaire
+                carburant_nom = prix.get('@nom', '')
+                carburant_valeur = float(prix.get('@valeur', 0))
+                maj = prix.get('@maj', '')
+                cursor.execute('''INSERT OR IGNORE INTO Carburant (nom) VALUES (?)''', (carburant_nom,))
+                carburant_id = cursor.lastrowid
+                prix_values = (int(station_data['id']), carburant_id, carburant_valeur, maj)
+                cursor.execute('''INSERT OR IGNORE INTO Prix (station_id, carburant_id, prix, maj) VALUES (?, ?, ?, ?)''',
+                               prix_values)
+
+def log_error(message):
+    # Journalisez les erreurs dans un fichier de journal ou imprimez-les pour le débogage
+    print(message)
+
+# Code principal
 with open('cache/cache_file.json', 'r', encoding='utf-8') as file:
     json_data_list = json.load(file)
 
