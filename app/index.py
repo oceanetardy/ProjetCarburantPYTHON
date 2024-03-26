@@ -4,10 +4,14 @@ import requests
 import pandas as pd
 from datetime import datetime, timedelta
 import pytz
+import subprocess
 
 CACHE_FOLDER = "cache"  # Dossier où les fichiers de cache seront stockés
 CACHE_EXPIRATION = timedelta(hours=1)  # Durée d'expiration du cache
 CACHE_FILE = "cache_file.json"  # Nom du fichier de cache
+
+subprocess.run(["python", "db/import.py"])
+
 
 def charger_donnees_json_de_url(url):
     # Générer le chemin complet du fichier de cache
@@ -84,3 +88,5 @@ donnees_json_de_url = charger_donnees_json_de_url(url)
 
 if donnees_json_de_url:
     sauvegarder_donnees_json("sortie.json", donnees_json_de_url)
+
+
