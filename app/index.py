@@ -5,14 +5,14 @@ import pandas as pd
 from datetime import datetime, timedelta
 import pytz
 import subprocess
+# from app.db.import_db import import_db
 
 CACHE_FOLDER = "cache"  # Dossier où les fichiers de cache seront stockés
 CACHE_EXPIRATION = timedelta(hours=1)  # Durée d'expiration du cache
 CACHE_FILE = "cache_file.json"  # Nom du fichier de cache
 
-subprocess.run(["python", "db/import.py"])
-
-
+subprocess.run(["python", "app/db/import_db.py"])
+# import_db
 def charger_donnees_json_de_url(url):
     # Générer le chemin complet du fichier de cache
     cacheFichier = os.path.join(CACHE_FOLDER, CACHE_FILE)
