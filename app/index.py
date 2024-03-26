@@ -41,7 +41,7 @@ def charger_donnees_json_de_url(url):
         donnees_json = reponse.json()
 
         # Charger les informations de marque et de nom depuis le fichier CSV
-        stations_with_name_file = "stations_with_name.csv"
+        stations_with_name_file = "app/stations_with_name.csv"
         df = pd.read_csv(stations_with_name_file)
 
         # Créer un dictionnaire avec les informations de marque et de nom pour chaque ID
