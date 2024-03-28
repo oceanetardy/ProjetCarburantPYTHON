@@ -119,7 +119,6 @@ def insert_station_services(cursor, station_data):
             service_id = cursor.lastrowid
             cursor.execute('''INSERT OR IGNORE INTO Station_Service (station_id, service_id) VALUES (?, ?)''',
                            (int(station_data['id']), service_id))
-
 def insert_fuel_prices(cursor, station_data):
     # Insertion des prix des carburants
     prix_json = station_data.get('prix', '[]')
@@ -130,8 +129,16 @@ def insert_fuel_prices(cursor, station_data):
                 carburant_nom = prix.get('@nom', '')
                 carburant_valeur = float(prix.get('@valeur', 0))
                 maj = prix.get('@maj', '')
-                cursor.execute('''INSERT OR IGNORE INTO Carburant (nom) VALUES (?)''', (carburant_nom,))
-                carburant_id = cursor.lastrowid
+                # Vérifier si le carburant existe déjà
+                cursor.execute('''SELECT id FROM Carburant WHERE nom = ?''', (carburant_nom,))
+                carburant_row = cursor.fetchone()
+                if carburant_row:
+                    carburant_id = carburant_row[0]
+                else:
+                    # Si le carburant n'existe pas, l'insérer
+                    cursor.execute('''INSERT INTO Carburant (nom) VALUES (?)''', (carburant_nom,))
+                    carburant_id = cursor.lastrowid
+                # Insérer le prix avec l'ID correct du carburant
                 prix_values = (int(station_data['id']), carburant_id, carburant_valeur, maj)
                 cursor.execute('''INSERT OR IGNORE INTO Prix (station_id, carburant_id, prix, maj) VALUES (?, ?, ?, ?)''',
                                prix_values)
