@@ -114,14 +114,14 @@ def update_fuel_prices(cursor):
     if invalid_ids:
         print("IDs de carburants invalides trouvés dans la table des prix : ", invalid_ids)
         for invalid_id in invalid_ids:
+            # Trouver le carburant correspondant dans la table Carburant
             cursor.execute("SELECT id FROM Carburant ORDER BY id LIMIT 1")
             valid_id = cursor.fetchone()[0]
 
+            # Mettre à jour l'ID du carburant dans la table des prix
             cursor.execute("UPDATE Prix SET carburant_id=? WHERE carburant_id=?", (valid_id, invalid_id))
 
         print("Les IDs de carburants invalides dans la table des prix ont été mis à jour.")
-
-
 def insert_fuel_prices(cursor, station_data):
     prix_json = station_data.get('prix', '[]')
     if prix_json:
@@ -148,7 +148,7 @@ def insert_fuel_prices(cursor, station_data):
 
 # Code principal
 json_file_path = 'cache/cache_file.json'
-db_file_path = 'app/db/stations_data.db'
+db_file_path = 'db/stations_data.db'
 
 # Vérifier si le fichier JSON existe, sinon le créer
 if not os.path.exists(json_file_path):
