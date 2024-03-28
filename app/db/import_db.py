@@ -109,16 +109,29 @@ def insert_station_data(cursor, station_data):
                       departement, code_departement, region, code_region, marque, horaires_automate_24_24) 
                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', station_values)
 
+
 def insert_station_services(cursor, station_data):
     # Insertion des services de la station
     services_json = station_data.get('services', '{}')
     if services_json:
         services = json.loads(services_json).get('service', [])
         for service in services:
-            cursor.execute('''INSERT OR IGNORE INTO Service (nom) VALUES (?)''', (service,))
-            service_id = cursor.lastrowid
-            cursor.execute('''INSERT OR IGNORE INTO Station_Service (station_id, service_id) VALUES (?, ?)''',
-                           (int(station_data['id']), service_id))
+            # Vérifier si le nom du service contient plus d'un caractère
+            if len(service) > 1:
+                # Vérifier si le service existe déjà
+                cursor.execute('''SELECT id FROM Service WHERE nom = ?''', (service,))
+                service_row = cursor.fetchone()
+
+                if service_row:
+                    service_id = service_row[0]
+                else:
+                    # Insérer le service s'il n'existe pas
+                    cursor.execute('''INSERT INTO Service (nom) VALUES (?)''', (service,))
+                    service_id = cursor.lastrowid
+
+                # Insérer la liaison entre la station et le service
+                cursor.execute('''INSERT OR IGNORE INTO Station_Service (station_id, service_id) VALUES (?, ?)''',
+                               (int(station_data['id']), service_id))
 def insert_fuel_prices(cursor, station_data):
     # Insertion des prix des carburants
     prix_json = station_data.get('prix', '[]')
