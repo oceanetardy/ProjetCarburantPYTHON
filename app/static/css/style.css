@@ -2,3 +2,7 @@
 .navbar-expand-lg {
     background-color: #E3D5CA !important;
 }
+
+navbar-brand {
+    font-family: Comfortaa; !important;
+}
