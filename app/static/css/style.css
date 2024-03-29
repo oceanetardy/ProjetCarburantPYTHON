@@ -1,8 +1,25 @@
-
 .navbar-expand-lg {
     background-color: #E3D5CA !important;
 }
 
-navbar-brand {
+.navbar-brand {
     font-family: Comfortaa; !important;
+}
+
+.navbar-light .navbar-nav .nav-link {
+    text-shadow:  0px 0px 2px rgb(128, 128, 128);
+    color: black; !important;
+    font-family: Comfortaa; !important;
+
+}
+
+.btn-brown{
+    color: black; !important;
+    background-color: #D5BDAF;
+    transition: color 0.3s;
+}
+
+.btn-brown:hover {
+    background-color: #CEB2A1;
+
 }
