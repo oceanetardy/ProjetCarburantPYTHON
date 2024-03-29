@@ -1,5 +1,3 @@
-<!-- templates/home.html -->
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -22,18 +20,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
 <body>
-
 <!--NAVARBAR START-->
 <nav class="navbar navbar-expand-lg navbar-light bg-creme">
     <a class="navbar-brand" href="#">
-        <img src="{{logo}}" alt="" height="30">
-        GasGenious
+        <img src="{{logo}}" alt="" height="30"> GasGenious
     </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
-
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
@@ -49,31 +44,25 @@
 <!--NAVARBAR END-->
 
 <div class="content">
-    <h1> PROJET CARBURANT</h1>
+    <h1>PROJET CARBURANT</h1>
     {{content}}{{test}}
 </div>
 
-
 <!-- ZONE DESSUS FOOTER START-->
-
-<div class=" text-center content-before-footer">
-  <div class="row">
-    <div class="col-8">
-        <p> Lorem ipsum</p>
+<div class=" content-before-footer">
+    <div class="row">
+        <div class="col-8 text-center">
+            <p>Vous souhaitez avoir des données sur le prix du carburant dans votre département, cliquez ici !</p>
+        </div>
+        <div class="col-4">
+            <button class="btn  my-2 my-sm-0 btn-brown-clair">Rechercher</button>
+            <button class="btn  my-2 my-sm-0 btn-clair">Statistiques</button>
+        </div>
     </div>
-    <div class="col-4">
-        <button class="btn  my-2 my-sm-0 btn-brown-clair"> Rechercher</button>
-        <button class="btn  my-2 my-sm-0 btn-clair"> Statistiques</button>
-        <button> Statistiques</button>
-    </div>
-  </div>
 </div>
-
 <!-- ZONE DESSUS FOOTER END-->
 
-
 <!--FOOTER START-->
-
 <footer class="text-center text-white footer">
     <div class="container">
         <section class="mt-5">
@@ -83,13 +72,11 @@
                         <a href="#!" class="text-footer">Rechercher</a>
                     </h6>
                 </div>
-
                 <div class="col-md-2">
                     <h6 class="text-footer">
                         <a href="#!" class="text-footer">Statistiques</a>
                     </h6>
                 </div>
-
                 <div class="col-md-2">
                     <h6 class="text-footer">
                         <a class="text-footer" href="#">
@@ -97,13 +84,11 @@
                         </a>
                     </h6>
                 </div>
-
                 <div class="col-md-2">
                     <h6 class="text-footer">
                         <a href="#!" class="text-footer">Accueil</a>
                     </h6>
                 </div>
-
                 <div class="col-md-2">
                     <h6 class="text-footer">
                         <a href="#!" class="text-footer">DataGouv</a>
@@ -111,16 +96,12 @@
                 </div>
             </div>
         </section>
-
         <hr class="my-5"/>
     </div>
-
     <div class="text-center p-3 copyright">
         © GasGenius, 2024
     </div>
 </footer>
 <!--FOOTER END-->
-
-
 </body>
 </html>
