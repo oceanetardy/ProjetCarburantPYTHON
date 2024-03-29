@@ -9,7 +9,8 @@ app.config["IMG_FOLDER"] = IMG_FOLDER
 @app.route('/')
 def home():
 	logoGasGenius = os.path.join(app.config["IMG_FOLDER"], "logoGasGenius.png")
-	return render_template('templateHome.html', logo=logoGasGenius)
+	gasstation = os.path.join(app.config["IMG_FOLDER"], "gasstation.jpg")
+	return render_template('templateHome.html', logo=logoGasGenius, gasstation=gasstation)
 
 
 if __name__ == '__main__':
