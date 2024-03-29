@@ -50,3 +50,18 @@
     margin-bottom: -60px;
     padding-bottom: 40px;
 }
+
+.content-before-footer{
+    background-color: #EDEDE9; !important;
+}
+
+.btn-brown-clair{
+    color: black; !important;
+    background-color: #D6CCC2;
+    transition: color 0.3s;
+}
+
+.btn-brown-clair:hover {
+    background-color: #CEB2A1;
+
+}
