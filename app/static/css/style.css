@@ -1,16 +1,19 @@
+* {
+    font-family: Comfortaa, sans-serif !important;
+}
+
 .navbar-expand-lg {
     background-color: #E3D5CA !important;
 }
 
-.navbar-brand {
-    font-family: Comfortaa; !important;
-}
 
 .navbar-light .navbar-nav .nav-link {
     text-shadow:  0px 0px 2px rgb(128, 128, 128);
     color: black; !important;
-    font-family: Comfortaa; !important;
+}
 
+.footer {
+    background-color: #E3D5CA
 }
 
 .btn-brown{
@@ -22,4 +25,28 @@
 .btn-brown:hover {
     background-color: #CEB2A1;
 
+}
+
+.copyright {
+    color: black;
+    margin-top: -40px; !important;
+}
+
+.content{
+        background-color: #FAF5F0 !important;
+
+}
+
+.text-footer{
+    color: black; !important;
+}
+
+.text-footer:hover {
+    color: black;
+
+}
+
+.img-footer{
+    margin-bottom: -60px;
+    padding-bottom: 40px;
 }

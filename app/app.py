@@ -3,11 +3,11 @@ import os
 
 app = Flask(__name__)
 IMG_FOLDER = os.path.join("static", "IMG")
-app.config["IMG_FOLDER"] = IMG_FOLDER  # A vérifier
+app.config["IMG_FOLDER"] = IMG_FOLDER
 
 
 @app.route('/')
-def hello():
+def home():
 	logoGasGenius = os.path.join(app.config["IMG_FOLDER"], "logoGasGenius.png")
 	return render_template('templateHome.html', logo=logoGasGenius)
 
