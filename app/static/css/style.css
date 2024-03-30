@@ -53,15 +53,13 @@ body {
     color: white !important;
 }
 
-.content {
-    background-color: #FAF5F0 !important;
-}
+
 
 .content-before-footer {
     background-color: #EDEDE9 !important;
     margin: 0;
     padding: 70px;
-    font-size: 23px;
+    font-size: 27px;
 }
 
 .text-footer {
@@ -80,4 +78,17 @@ body {
 .copyright {
     color: black !important;
     margin-top: -40px !important;
+}
+
+.row-img-txt{
+    margin: 100px;
+}
+
+.row-txt-txt{
+    margin: 100px;
+}
+
+.img-home {
+    width: 500px;
+    height: 270px;
 }
