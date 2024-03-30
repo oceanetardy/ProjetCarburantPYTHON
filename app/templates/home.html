@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}GasGenius - Accueil {% endblock %}
+{% block content %}
+<!-- ZONE DOUBLE ROW START-->
+
+
+
+
+
+
+<div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h2><strong>Informations certifiées</strong></h2>
+                <p>Accédez à des données fiables et certifiées sur les carburants,
+                    directement issues des sources officielles du gouvernement.
+                    Notre plateforme vous offre un accès privilégié à des statistiques
+                    précises et actualisées, garantissant une transparence totale dans un secteur crucial. </p>
+            </div>
+            <div class="col-md-6 text-center">
+                <img src="{{gasstation}}" alt="Image" class="img-fluid">
+            </div>
+        </div>
+    </div>
+<!-- ZONE DOUBLE ROW END-->
+
+
+<!-- ZONE DESSUS FOOTER START-->
+<div class=" content-before-footer">
+    <div class="row">
+        <div class="col-8 text-center">
+            <p>Vous souhaitez avoir des données sur le prix du carburant dans votre département, cliquez ici !</p>
+        </div>
+        <div class="col-4">
+            <button class="btn  my-2 my-sm-0 btn-brown-clair">Rechercher</button>
+            <button class="btn  my-2 my-sm-0 btn-clair">Statistiques</button>
+        </div>
+    </div>
+</div>
+<!-- ZONE DESSUS FOOTER END-->
+{% endblock %}
