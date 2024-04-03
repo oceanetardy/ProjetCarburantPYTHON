@@ -96,3 +96,14 @@ body {
 .title-row{
     margin-top: 30px;
 }
+
+.img-carb{
+    width: 200px;
+    height: 120px;
+    clip-path:ellipse(33% 50%);
+}
+
+.img-stats{
+        width: 900px;
+    height: 500px;
+}

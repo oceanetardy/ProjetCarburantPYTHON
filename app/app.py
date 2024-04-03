@@ -6,6 +6,9 @@ IMG_FOLDER = os.path.join("static", "IMG")
 app.config["IMG_FOLDER"] = IMG_FOLDER
 logoGasGenius = os.path.join(app.config["IMG_FOLDER"], "logoGasGenius.png")
 gasstation = os.path.join(app.config["IMG_FOLDER"], "gasstation.jpg")
+gaspump = os.path.join(app.config["IMG_FOLDER"], "gaspump.jpg")
+# Image pour visuel seulement matplotlib -> Sera géré en Python
+feinte = os.path.join(app.config["IMG_FOLDER"], "feinte.png")
 
 @app.route('/')
 def home():
@@ -13,7 +16,7 @@ def home():
 
 @app.route('/statistiques-nationales')
 def statisticNational():
-	return render_template('nationalstatistic.html', logo=logoGasGenius, gasstation=gasstation)
+	return render_template('nationalstatistic.html', logo=logoGasGenius, gasstation=gasstation, gaspump=gaspump, feinte=feinte)
 
 @app.route('/rechercher')
 def findstation():
