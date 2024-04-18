@@ -10,7 +10,7 @@ CACHE_FOLDER = "cache"  # Dossier où les fichiers de cache seront stockés
 CACHE_EXPIRATION = timedelta(hours=1)  # Durée d'expiration du cache
 CACHE_FILE = "cache_file.json"  # Nom du fichier de cache
 
-subprocess.run(["python", "db/import_db.py"])
+
 def charger_donnees_json_de_url(url):
     # Générer le chemin complet du fichier de cache
     cacheFichier = os.path.join(CACHE_FOLDER, CACHE_FILE)
@@ -71,6 +71,9 @@ def charger_donnees_json_de_url(url):
             print(f"Données sauvegardées dans le cache {cacheFichier}, {len(donnees_json)} éléments")
 
         return donnees_json
+    elif reponse.status_code == 404:
+        print(f"La requête HTTP vers {url} a retourné une erreur 404. Aucune donnée n'a été récupérée.")
+        return None
     else:
         print(f"Échec du chargement des données depuis {url}. Code d'état : {reponse.status_code}")
         return None
@@ -83,8 +86,9 @@ def sauvegarder_donnees_json(nom_fichier, donnees_json):
 # Données json
 url = "https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/exports/json?lang=fr&timezone=Europe%2FParis"
 donnees_json_de_url = charger_donnees_json_de_url(url)
-
-if donnees_json_de_url:
-    sauvegarder_donnees_json("sortie.json", donnees_json_de_url)
+subprocess.run(["python", "app/db/import_db.py"])
 
 
+
+# if donnees_json_de_url:
+#     sauvegarder_donnees_json("sortie.json", donnees_json_de_url)

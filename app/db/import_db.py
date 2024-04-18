@@ -2,7 +2,7 @@ import sqlite3
 import json
 
 def create_tables():
-    conn = sqlite3.connect('db/stations_data.db')
+    conn = sqlite3.connect('app/db/stations_data.db')
     cursor = conn.cursor()
 
     cursor.execute('''CREATE TABLE IF NOT EXISTS Station (
@@ -54,7 +54,7 @@ def create_tables():
     conn.close()
 
 def insert_data_from_json(station_data):
-    conn = sqlite3.connect('db/stations_data.db')
+    conn = sqlite3.connect('app/db/stations_data.db')
     cursor = conn.cursor()
 
     try:
@@ -75,7 +75,7 @@ def insert_data_from_json(station_data):
 
         # Validation de la transaction
         conn.commit()
-        print(f"Données pour la station avec l'ID {station_data['id']} insérées avec succès.")
+        print(f"Données pour la station avec l'ID {station_data['id']} insérées avec succès depuis le cache.")
     except Exception as e:
         # Journalisation des erreurs
         log_error(f"Erreur lors de l'insertion des données pour la station avec l'ID {station_data['id']}: {str(e)}")
@@ -161,7 +161,7 @@ def log_error(message):
     print(message)
 
 # Code principal
-with open('cache/cache_file.json', 'r', encoding='utf-8') as file:
+with open('app/cache/cache_file.json', 'r', encoding='utf-8') as file:
     json_data_list = json.load(file)
 
 create_tables()
@@ -169,4 +169,4 @@ create_tables()
 for station_data in json_data_list:
     insert_data_from_json(station_data)
 
-print("Les données ont été insérées avec succès dans la base de données.")
+print("Les données ont été insérées avec succès dans la base de données depuis le cache.")
