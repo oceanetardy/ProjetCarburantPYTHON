@@ -45,8 +45,29 @@ def charger_donnees_json_de_url(base_url):
     offset = 0
     all_data = []
 
-    while True:
-        url = f"{base_url}?limit={LIMIT}&offset={offset}"
+    def get_total_count():
+        url = f"{base_url}?limit=1&offset=0"
+        try:
+            reponse = requests.get(url)
+            if reponse.status_code == 200:
+                total_count = reponse.json().get('total_count', 0)
+                return total_count
+            else:
+                print(f"Échec de récupération du nombre total d'enregistrements. Code d'état : {reponse.status_code}")
+                return 0
+        except Exception as e:
+            print(f"Erreur lors de la récupération du nombre total d'enregistrements : {e}")
+            return 0
+
+    total_count = get_total_count()
+    if total_count == 0:
+        print("Impossible de récupérer les données car le nombre total d'enregistrements est inconnu.")
+    else:
+        print(f"Nombre total d'enregistrements : {total_count}")
+
+    while offset < total_count:
+        limit = min(LIMIT, total_count - offset)
+        url = f"{base_url}?limit={limit}&offset={offset}"
         try:
             reponse = requests.get(url)
             print(f"Requête HTTP vers {url}, code de réponse : {reponse.status_code}")
@@ -56,14 +77,13 @@ def charger_donnees_json_de_url(base_url):
                 if not donnees_json:
                     break  # Stop the loop if no data is returned
                 all_data.extend(donnees_json)
-                offset += LIMIT
+                offset += len(donnees_json)
             else:
                 print(f"Échec du chargement des données depuis {url}. Code d'état : {reponse.status_code}")
                 break
         except Exception as e:
             print(f"Erreur lors de la requête HTTP : {e}")
             break
-
     # Load brand and name information from the CSV file
     stations_with_name_file = "app/stations_with_name.csv"
     df = pd.read_csv(stations_with_name_file)
