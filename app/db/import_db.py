@@ -2,15 +2,11 @@ import sqlite3
 import json
 import os
 
-# Obtenir le chemin absolu du répertoire courant
 base_dir = os.path.abspath(os.path.dirname(__file__))
-
-# Définir les chemins de la base de données et du fichier de cache
 db_path = os.path.join(base_dir, '..', 'db', 'stations_data.db')
 cache_file_path = os.path.join(base_dir, '..', 'cache', 'cache_file.json')
 
 def create_tables():
-    # Créer le répertoire de la base de données s'il n'existe pas
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
 
     conn = sqlite3.connect(db_path)
@@ -69,38 +65,26 @@ def insert_data_from_json(station_data):
     cursor = conn.cursor()
 
     try:
-        # Validation des données d'entrée
         validate_station_data(station_data)
-
-        # Début de la transaction explicite
         cursor.execute("BEGIN")
 
-        # Insertion des données de la station
         insert_station_data(cursor, station_data)
-
-        # Insertion des services de la station
         insert_station_services(cursor, station_data)
-
-        # Insertion des prix des carburants
         insert_fuel_prices(cursor, station_data)
 
-        # Validation de la transaction
         conn.commit()
-        print(f"Données pour la station avec l'ID {station_data['id']} insérées avec succès depuis le cache.")
+        print(f"Data for station with ID {station_data['id']} successfully inserted from cache.")
     except Exception as e:
-        # Journalisation des erreurs
-        log_error(f"Erreur lors de l'insertion des données pour la station avec l'ID {station_data['id']}: {str(e)}")
-        # Annulation de la transaction en cas d'erreur
+        log_error(f"Error inserting data for station with ID {station_data['id']}: {str(e)}")
         conn.rollback()
     finally:
         conn.close()
 
 def validate_station_data(station_data):
-    # Ajoutez ici votre logique de validation des données d'entrée
+    # Add your data validation logic here
     pass
 
 def insert_station_data(cursor, station_data):
-    # Insertion des données de la station
     station_values = (
         int(station_data['id']),
         station_data.get('nom', ''),
@@ -121,48 +105,39 @@ def insert_station_data(cursor, station_data):
                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', station_values)
 
 def insert_station_services(cursor, station_data):
-    # Insertion des services de la station
     services_json = station_data.get('services', '{}')
     if services_json:
         services = json.loads(services_json).get('service', [])
         for service in services:
-            # Vérifier si le nom du service contient plus d'un caractère
             if len(service) > 1:
-                # Vérifier si le service existe déjà
                 cursor.execute('''SELECT id FROM Service WHERE nom = ?''', (service,))
                 service_row = cursor.fetchone()
 
                 if service_row:
                     service_id = service_row[0]
                 else:
-                    # Insérer le service s'il n'existe pas
                     cursor.execute('''INSERT INTO Service (nom) VALUES (?)''', (service,))
                     service_id = cursor.lastrowid
 
-                # Insérer la liaison entre la station et le service
                 cursor.execute('''INSERT OR IGNORE INTO Station_Service (station_id, service_id) VALUES (?, ?)''',
                                (int(station_data['id']), service_id))
 
 def insert_fuel_prices(cursor, station_data):
-    # Insertion des prix des carburants
     prix_json = station_data.get('prix', '[]')
     if prix_json:
         prix_list = json.loads(prix_json)
         for prix in prix_list:
-            if isinstance(prix, dict):  # Vérification si l'élément est un dictionnaire
+            if isinstance(prix, dict):
                 carburant_nom = prix.get('@nom', '')
                 carburant_valeur = float(prix.get('@valeur', 0))
                 maj = prix.get('@maj', '')
-                # Vérifier si le carburant existe déjà
                 cursor.execute('''SELECT id FROM Carburant WHERE nom = ?''', (carburant_nom,))
                 carburant_row = cursor.fetchone()
                 if carburant_row:
                     carburant_id = carburant_row[0]
                 else:
-                    # Si le carburant n'existe pas, l'insérer
                     cursor.execute('''INSERT INTO Carburant (nom) VALUES (?)''', (carburant_nom,))
                     carburant_id = cursor.lastrowid
-                # Insérer le prix avec l'ID correct du carburant
                 prix_values = (int(station_data['id']), carburant_id, carburant_valeur, maj)
                 cursor.execute('''INSERT OR IGNORE INTO Prix (station_id, carburant_id, prix, maj) VALUES (?, ?, ?, ?)''',
                                prix_values)
@@ -179,6 +154,6 @@ if os.path.exists(cache_file_path):
     for station_data in json_data_list:
         insert_data_from_json(station_data)
 
-    print("Les données ont été insérées avec succès dans la base de données depuis le cache.")
+    print("Data successfully inserted into database from cache.")
 else:
-    print(f"Le fichier de cache {cache_file_path} n'existe pas.")
+    print(f"Cache file {cache_file_path} does not exist.")
