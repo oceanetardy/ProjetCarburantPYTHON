@@ -1,8 +1,19 @@
 import sqlite3
 import json
+import os
+
+# Obtenir le chemin absolu du répertoire courant
+base_dir = os.path.abspath(os.path.dirname(__file__))
+
+# Définir les chemins de la base de données et du fichier de cache
+db_path = os.path.join(base_dir, '..', 'db', 'stations_data.db')
+cache_file_path = os.path.join(base_dir, '..', 'cache', 'cache_file.json')
 
 def create_tables():
-    conn = sqlite3.connect('app/db/stations_data.db')
+    # Créer le répertoire de la base de données s'il n'existe pas
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     cursor.execute('''CREATE TABLE IF NOT EXISTS Station (
@@ -54,7 +65,7 @@ def create_tables():
     conn.close()
 
 def insert_data_from_json(station_data):
-    conn = sqlite3.connect('app/db/stations_data.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     try:
@@ -109,7 +120,6 @@ def insert_station_data(cursor, station_data):
                       departement, code_departement, region, code_region, marque, horaires_automate_24_24) 
                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', station_values)
 
-
 def insert_station_services(cursor, station_data):
     # Insertion des services de la station
     services_json = station_data.get('services', '{}')
@@ -132,6 +142,7 @@ def insert_station_services(cursor, station_data):
                 # Insérer la liaison entre la station et le service
                 cursor.execute('''INSERT OR IGNORE INTO Station_Service (station_id, service_id) VALUES (?, ?)''',
                                (int(station_data['id']), service_id))
+
 def insert_fuel_prices(cursor, station_data):
     # Insertion des prix des carburants
     prix_json = station_data.get('prix', '[]')
@@ -157,16 +168,17 @@ def insert_fuel_prices(cursor, station_data):
                                prix_values)
 
 def log_error(message):
-    # Journalisez les erreurs dans un fichier de journal ou imprimez-les pour le débogage
     print(message)
 
-# Code principal
-with open('app/cache/cache_file.json', 'r', encoding='utf-8') as file:
-    json_data_list = json.load(file)
+if os.path.exists(cache_file_path):
+    with open(cache_file_path, 'r', encoding='utf-8') as file:
+        json_data_list = json.load(file)
 
-create_tables()
+    create_tables()
 
-for station_data in json_data_list:
-    insert_data_from_json(station_data)
+    for station_data in json_data_list:
+        insert_data_from_json(station_data)
 
-print("Les données ont été insérées avec succès dans la base de données depuis le cache.")
+    print("Les données ont été insérées avec succès dans la base de données depuis le cache.")
+else:
+    print(f"Le fichier de cache {cache_file_path} n'existe pas.")

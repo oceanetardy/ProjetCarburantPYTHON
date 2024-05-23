@@ -6,16 +6,18 @@ from datetime import datetime, timedelta
 import pytz
 import subprocess
 
-CACHE_FOLDER = "cache"  # Dossier où les fichiers de cache seront stockés
-CACHE_EXPIRATION = timedelta(hours=1)  # Durée d'expiration du cache
-CACHE_FILE = "cache_file.json"  # Nom du fichier de cache
+# Constants
+CACHE_FOLDER = "app/cache/"  # Cache directory
+CACHE_EXPIRATION = timedelta(hours=1)  # Cache expiration duration
+CACHE_FILE = "cache_file.json"  # Cache file name
+LIMIT = 100  # Number of results per request
 
-
-def charger_donnees_json_de_url(url):
-    # Générer le chemin complet du fichier de cache
+def charger_donnees_json_de_url(base_url):
+    # Construct full cache file path
     cacheFichier = os.path.join(CACHE_FOLDER, CACHE_FILE)
+    print(f"Chemin du fichier de cache : {cacheFichier}")
 
-    # Vérifier si le fichier de cache existe et s'il n'a pas expiré
+    # Check if the cache file exists and is still valid
     if os.path.exists(cacheFichier):
         timestamp_expiration = os.path.getmtime(cacheFichier) + CACHE_EXPIRATION.total_seconds()
         current_timestamp = datetime.now().timestamp()
@@ -27,68 +29,70 @@ def charger_donnees_json_de_url(url):
         print(f"Heure actuelle : {current_date}")
 
         if current_timestamp < timestamp_expiration:
-            with open(cacheFichier, 'r', encoding='utf-8') as fichier:
-                donnees_json = json.load(fichier)
-                print(f"Données chargées depuis le cache {cacheFichier}, {len(donnees_json)} éléments")
-                return donnees_json
+            try:
+                with open(cacheFichier, 'r', encoding='utf-8') as fichier:
+                    donnees_json = json.load(fichier)
+                    print(f"Données chargées depuis le cache {cacheFichier}, {len(donnees_json)} éléments")
+                    return donnees_json
+            except Exception as e:
+                print(f"Erreur lors du chargement des données depuis le cache : {e}")
         else:
             print("Le cache a expiré.")
     else:
         print(f"Le fichier de cache {cacheFichier} n'existe pas.")
 
-    # Si le fichier de cache n'existe pas ou a expiré, faire la requête HTTP
-    reponse = requests.get(url)
+    # If the cache file does not exist or has expired, make the HTTP request
+    offset = 0
+    all_data = []
 
-    if reponse.status_code == 200:
-        donnees_json = reponse.json()
+    while True:
+        url = f"{base_url}?limit={LIMIT}&offset={offset}"
+        try:
+            reponse = requests.get(url)
+            print(f"Requête HTTP vers {url}, code de réponse : {reponse.status_code}")
 
-        # Charger les informations de marque et de nom depuis le fichier CSV
-        stations_with_name_file = "stations_with_name.csv"
-        df = pd.read_csv(stations_with_name_file)
+            if reponse.status_code == 200:
+                donnees_json = reponse.json().get('results', [])
+                if not donnees_json:
+                    break  # Stop the loop if no data is returned
+                all_data.extend(donnees_json)
+                offset += LIMIT
+            else:
+                print(f"Échec du chargement des données depuis {url}. Code d'état : {reponse.status_code}")
+                break
+        except Exception as e:
+            print(f"Erreur lors de la requête HTTP : {e}")
+            break
 
-        # Créer un dictionnaire avec les informations de marque et de nom pour chaque ID
-        id_info_dict = {str(row['ID']): {'marque': row['Marque'], 'nom': row['Nom']} for _, row in df.iterrows()}
+    # Load brand and name information from the CSV file
+    stations_with_name_file = "app/stations_with_name.csv"
+    df = pd.read_csv(stations_with_name_file)
 
-        # Si les données sont une liste, itérer sur la liste
-        if isinstance(donnees_json, list):
-            for idx, item in enumerate(donnees_json):
-                item_id = str(item['id'])
-                if item_id in id_info_dict:
-                    item.update(id_info_dict[item_id])
-        elif isinstance(donnees_json, dict):
-            # Si les données sont un dictionnaire, itérer sur les valeurs
-            for item in donnees_json.values():
-                item_id = str(item['id'])
-                if item_id in id_info_dict:
-                    item.update(id_info_dict[item_id])
+    # Create a dictionary with brand and name information for each ID
+    id_info_dict = {str(row['ID']): {'marque': row['Marque'], 'nom': row['Nom']} for _, row in df.iterrows()}
 
-        print(f"Données chargées depuis {url}, {len(donnees_json)} éléments")
+    # Iterate over the list of data
+    for item in all_data:
+        item_id = str(item['id'])
+        if item_id in id_info_dict:
+            item.update(id_info_dict[item_id])
 
-        # Sauvegarder les données dans le cache
-        os.makedirs(CACHE_FOLDER, exist_ok=True)
+    print(f"Données chargées depuis {base_url}, {len(all_data)} éléments")
+
+    # Save the data to the cache
+    os.makedirs(CACHE_FOLDER, exist_ok=True)
+    try:
         with open(cacheFichier, 'w', encoding='utf-8') as fichier_cache:
-            json.dump(donnees_json, fichier_cache, ensure_ascii=False)
-            print(f"Données sauvegardées dans le cache {cacheFichier}, {len(donnees_json)} éléments")
+            json.dump(all_data, fichier_cache, ensure_ascii=False)
+            print(f"Données sauvegardées dans le cache {cacheFichier}, {len(all_data)} éléments")
+    except Exception as e:
+        print(f"Erreur lors de la sauvegarde des données dans le cache : {e}")
 
-        return donnees_json
-    elif reponse.status_code == 404:
-        print(f"La requête HTTP vers {url} a retourné une erreur 404. Aucune donnée n'a été récupérée.")
-        return None
-    else:
-        print(f"Échec du chargement des données depuis {url}. Code d'état : {reponse.status_code}")
-        return None
-
-def sauvegarder_donnees_json(nom_fichier, donnees_json):
-    with open(nom_fichier, 'w', encoding='utf-8') as fichier:
-        json.dump(donnees_json, fichier, ensure_ascii=False)
-        print(f"Données sauvegardées dans {nom_fichier}, {len(donnees_json)} éléments")
+    return all_data
 
 # Données json
-url = "https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/exports/json?lang=fr&timezone=Europe%2FParis"
-donnees_json_de_url = charger_donnees_json_de_url(url)
+base_url = "https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records"
+donnees_json_de_url = charger_donnees_json_de_url(base_url)
+
+# Call the script import_db.py with subprocess
 subprocess.run(["python", "app/db/import_db.py"])
-
-
-
-# if donnees_json_de_url:
-#     sauvegarder_donnees_json("sortie.json", donnees_json_de_url)
