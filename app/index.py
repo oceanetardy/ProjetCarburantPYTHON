@@ -7,17 +7,15 @@ import pytz
 import subprocess
 
 # Constants
-CACHE_FOLDER = "app/cache/"  # Cache directory
-CACHE_EXPIRATION = timedelta(hours=1)  # Cache expiration duration
-CACHE_FILE = "cache_file.json"  # Cache file name
-LIMIT = 100  # Number of results per request
+CACHE_FOLDER = "cache/"
+CACHE_EXPIRATION = timedelta(hours=1)
+CACHE_FILE = "cache_file.json"
+LIMIT = 100
 
 def charger_donnees_json_de_url(base_url):
-    # Construct full cache file path
     cacheFichier = os.path.join(CACHE_FOLDER, CACHE_FILE)
     print(f"Chemin du fichier de cache : {cacheFichier}")
 
-    # Check if the cache file exists and is still valid
     if os.path.exists(cacheFichier):
         timestamp_expiration = os.path.getmtime(cacheFichier) + CACHE_EXPIRATION.total_seconds()
         current_timestamp = datetime.now().timestamp()
@@ -41,7 +39,6 @@ def charger_donnees_json_de_url(base_url):
     else:
         print(f"Le fichier de cache {cacheFichier} n'existe pas.")
 
-    # If the cache file does not exist or has expired, make the HTTP request
     offset = 0
     all_data = []
 
@@ -84,14 +81,12 @@ def charger_donnees_json_de_url(base_url):
         except Exception as e:
             print(f"Erreur lors de la requête HTTP : {e}")
             break
-    # Load brand and name information from the CSV file
-    stations_with_name_file = "app/stations_with_name.csv"
+
+    stations_with_name_file = "stations_with_name.csv"
     df = pd.read_csv(stations_with_name_file)
 
-    # Create a dictionary with brand and name information for each ID
     id_info_dict = {str(row['ID']): {'marque': row['Marque'], 'nom': row['Nom']} for _, row in df.iterrows()}
 
-    # Iterate over the list of data
     for item in all_data:
         item_id = str(item['id'])
         if item_id in id_info_dict:
@@ -99,7 +94,6 @@ def charger_donnees_json_de_url(base_url):
 
     print(f"Données chargées depuis {base_url}, {len(all_data)} éléments")
 
-    # Save the data to the cache
     os.makedirs(CACHE_FOLDER, exist_ok=True)
     try:
         with open(cacheFichier, 'w', encoding='utf-8') as fichier_cache:
@@ -114,5 +108,4 @@ def charger_donnees_json_de_url(base_url):
 base_url = "https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records"
 donnees_json_de_url = charger_donnees_json_de_url(base_url)
 
-# Call the script import_db.py with subprocess
-subprocess.run(["python", "app/db/import_db.py"])
+subprocess.run(["python", "db/import_db.py"])
