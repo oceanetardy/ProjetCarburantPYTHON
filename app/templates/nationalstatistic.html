@@ -6,176 +6,45 @@
     <div class="row title-row">
         <h1>Explorez les statistiques nationales</h1>
     </div>
-    <div class="row">
-        <div class="col-md-4">
-            <img src="{{gaspump}}" alt="Image" class="img-carb">
-            <h2>Gazole</h2>
-            <h3>Prix le plus cher</h3>
-            <br>
-            XX,XX€
-            <br>
-            Station Carrefour Market
-            <br>
-            596 AVENUE DE TREVOUX
-            <br>
-            01000 Saint-Denis-lès-Bourg
-            <br>
-            <h3>Prix le moins cher</h3>
-            <br>
-            XX,XX€
-            <br>
-            Station Carrefour Market
-            <br>
-            596 AVENUE DE TREVOUX
-            <br>
-            01000 Saint-Denis-lès-Bourg
-            <br>
-            <h3>Prix moyen</h3>
-            <br>
-            XX,XX€
-            <br>
-        </div>
-                <div class="col-md-4">
-            <img src="{{gaspump}}" alt="Image" class="img-carb">
-            <h2>Gazole</h2>
-            <h3>Prix le plus cher</h3>
-            <br>
-            XX,XX€
-            <br>
-            Station Carrefour Market
-            <br>
-            596 AVENUE DE TREVOUX
-            <br>
-            01000 Saint-Denis-lès-Bourg
-            <br>
-            <h3>Prix le moins cher</h3>
-            <br>
-            XX,XX€
-            <br>
-            Station Carrefour Market
-            <br>
-            596 AVENUE DE TREVOUX
-            <br>
-            01000 Saint-Denis-lès-Bourg
-            <br>
-            <h3>Prix moyen</h3>
-            <br>
-            XX,XX€
-            <br>
-        </div>
-                <div class="col-md-4">
-            <img src="{{gaspump}}" alt="Image" class="img-carb">
-            <h2>Gazole</h2>
-            <h3>Prix le plus cher</h3>
-            <br>
-            XX,XX€
-            <br>
-            Station Carrefour Market
-            <br>
-            596 AVENUE DE TREVOUX
-            <br>
-            01000 Saint-Denis-lès-Bourg
-            <br>
-            <h3>Prix le moins cher</h3>
-            <br>
-            XX,XX€
-            <br>
-            Station Carrefour Market
-            <br>
-            596 AVENUE DE TREVOUX
-            <br>
-            01000 Saint-Denis-lès-Bourg
-            <br>
-            <h3>Prix moyen</h3>
-            <br>
-            XX,XX€
-            <br>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-4">
-            <img src="{{gaspump}}" alt="Image" class="img-carb">
-            <h2>Gazole</h2>
-            <h3>Prix le plus cher</h3>
-            <br>
-            XX,XX€
-            <br>
-            Station Carrefour Market
-            <br>
-            596 AVENUE DE TREVOUX
-            <br>
-            01000 Saint-Denis-lès-Bourg
-            <br>
-            <h3>Prix le moins cher</h3>
-            <br>
-            XX,XX€
-            <br>
-            Station Carrefour Market
-            <br>
-            596 AVENUE DE TREVOUX
-            <br>
-            01000 Saint-Denis-lès-Bourg
-            <br>
-            <h3>Prix moyen</h3>
-            <br>
-            XX,XX€
-            <br>
-        </div>
-                <div class="col-md-4">
-            <img src="{{gaspump}}" alt="Image" class="img-carb">
-            <h2>Gazole</h2>
-            <h3>Prix le plus cher</h3>
-            <br>
-            XX,XX€
-            <br>
-            Station Carrefour Market
-            <br>
-            596 AVENUE DE TREVOUX
-            <br>
-            01000 Saint-Denis-lès-Bourg
-            <br>
-            <h3>Prix le moins cher</h3>
-            <br>
-            XX,XX€
-            <br>
-            Station Carrefour Market
-            <br>
-            596 AVENUE DE TREVOUX
-            <br>
-            01000 Saint-Denis-lès-Bourg
-            <br>
-            <h3>Prix moyen</h3>
-            <br>
-            XX,XX€
-            <br>
-        </div>
-                <div class="col-md-4">
-            <img src="{{gaspump}}" alt="Image" class="img-carb">
-            <h2>Gazole</h2>
-            <h3>Prix le plus cher</h3>
-            <br>
-            XX,XX€
-            <br>
-            Station Carrefour Market
-            <br>
-            596 AVENUE DE TREVOUX
-            <br>
-            01000 Saint-Denis-lès-Bourg
-            <br>
-            <h3>Prix le moins cher</h3>
-            <br>
-            XX,XX€
-            <br>
-            Station Carrefour Market
-            <br>
-            596 AVENUE DE TREVOUX
-            <br>
-            01000 Saint-Denis-lès-Bourg
-            <br>
-            <h3>Prix moyen</h3>
-            <br>
-            XX,XX€
-            <br>
+    {% if carburant_info %}
+        {% for carburant, info in carburant_info.items() %}
+        <div class="row">
+            <div class="col-md-4">
+                <img src="{{ gaspump }}" alt="Image" class="img-carb">
+                <h2>{{ carburant }}</h2>
+                <h3>Prix le plus cher</h3>
+                <br>
+                {% if info.max_price %}
+                    {{ info.max_price[1] }}€
+                    <br>
+                    {{ info.max_price[2] }}
+                    <br>
+                    {{ info.max_price[3] }}
+                    <br>
+                    {{ info.max_price[4] }} {{ info.max_price[5] }}
+                {% else %}
+                    <p>Information non disponible</p>
+                {% endif %}
+                <br>
+                <h3>Prix le moins cher</h3>
+                <br>
+                {% if info.min_price %}
+                    {{ info.min_price[1] }}€
+                    <br>
+                    {{ info.min_price[2] }}
+                    <br>
+                    {{ info.min_price[3] }}
+                    <br>
+                    {{ info.min_price[4] }} {{ info.min_price[5] }}
+                {% else %}
+                    <p>Information non disponible</p>
+                {% endif %}
+                <br>
+                <h3>Prix moyen</h3>
+                <br>
+                {{ info.avg_price }}€
+                <br>
+            </div>
         </div>
     </div>
 
