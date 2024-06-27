@@ -5,3 +5,5 @@ Les éléments à étudier / tester / voir :
 - Mise en cache du nom des stations
 - Mise en place de la BDD
 - Architecture des fichiers
+- Reprendre front sur page statistiques nationales
+- Vérifier si statistiques ok et cohérentes
