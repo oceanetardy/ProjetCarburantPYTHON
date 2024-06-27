@@ -1,5 +1,6 @@
 from flask import Flask, render_template
 import os
+from db.request_sql import get_carburant_info
 
 app = Flask(__name__)
 IMG_FOLDER = os.path.join("static", "IMG")
@@ -13,10 +14,11 @@ feinte = os.path.join(app.config["IMG_FOLDER"], "feinte.png")
 @app.route('/')
 def home():
 	return render_template('home.html', logo=logoGasGenius, gasstation=gasstation)
-
 @app.route('/statistiques-nationales')
 def statisticNational():
-	return render_template('nationalstatistic.html', logo=logoGasGenius, gasstation=gasstation, gaspump=gaspump, feinte=feinte)
+    db_path = 'db/stations_data.db'
+    carburant_info = get_carburant_info(db_path)
+    return render_template('nationalstatistic.html', logo=logoGasGenius, gasstation=gasstation, gaspump=gaspump, feinte=feinte, carburant_info=carburant_info)
 
 @app.route('/rechercher')
 def findstation():
