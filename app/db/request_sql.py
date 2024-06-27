@@ -1,11 +1,14 @@
+import os
 import sqlite3
+import matplotlib.pyplot as plt
+
 
 
 def get_carburant_info(db_path):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    carburants = ["Gazole", "E10", "SP98", "SP95", "E8", "GPLc"]
+    carburants = ["Gazole", "E10", "SP98", "SP95", "E85", "GPLc"]
     carburant_info = {}
 
     for carburant in carburants:
@@ -49,3 +52,26 @@ def get_carburant_info(db_path):
 
     conn.close()
     return carburant_info
+
+def generate_carburant_plot(carburant_info, output_folder):
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    carburants = list(carburant_info.keys())
+    avg_prices = [carburant_info[carburant]['avg_price'] for carburant in carburants]
+
+    # Vérifier et remplacer les valeurs None par 0
+    avg_prices = [price if price is not None else 0 for price in avg_prices]
+
+    plt.figure(figsize=(10, 6))
+    plt.bar(carburants, avg_prices, color='skyblue')
+    plt.xlabel('Carburants')
+    plt.ylabel('Prix moyen (€)')
+    plt.title('Prix moyen des carburants en France')
+    plt.tight_layout()
+
+    plot_path = os.path.join(output_folder, 'carburant_avg_prices.png')
+    plt.savefig(plot_path)
+    plt.close()
+
+    return plot_path
