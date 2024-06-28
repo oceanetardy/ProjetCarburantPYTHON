@@ -10,11 +10,39 @@ import subprocess
 CACHE_FOLDER = "cache/"
 CACHE_EXPIRATION = timedelta(hours=1)
 CACHE_FILE = "cache_file.json"
+BASE_URL = "https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records"
+
 LIMIT = 100
 
+#Obtenir le nom du fichier de cache
+def cache_name():
+    return os.path.join(CACHE_FOLDER, CACHE_FILE)
+
+#Voir si le cache est ok
+def cache_hit():
+    cacheFichier = cache_name()
+    if not os.path.exists(cacheFichier):
+        print(f"Le fichier de cache {cacheFichier} n'existe pas.")
+        return False
+
+
+    if datetime.now().timestamp() >= os.path.getmtime(cacheFichier) + CACHE_EXPIRATION.total_seconds():
+        print("Le cache a expiré.")
+
+    return True
+
+
 def charger_donnees_json_de_url(base_url):
-    cacheFichier = os.path.join(CACHE_FOLDER, CACHE_FILE)
-    print(f"Chemin du fichier de cache : {cacheFichier}")
+    cacheFichier = cache_name()
+    if cache_hit():
+        try:
+            with open(cacheFichier, 'r', encoding='utf-8') as fichier:
+                donnees_json = json.load(fichier)
+                print(f"Données chargées depuis le cache {cacheFichier}, {len(donnees_json)} éléments")
+                return donnees_json
+        except Exception as e:
+            print(f"Erreur lors du chargement des données depuis le cache : {e}")
+
 
     if os.path.exists(cacheFichier):
         timestamp_expiration = os.path.getmtime(cacheFichier) + CACHE_EXPIRATION.total_seconds()
@@ -43,7 +71,7 @@ def charger_donnees_json_de_url(base_url):
     all_data = []
 
     def get_total_count():
-        url = f"{base_url}?limit=1&offset=0"
+        url = f"{BASE_URL}?limit=1&offset=0"
         try:
             reponse = requests.get(url)
             if reponse.status_code == 200:
@@ -64,7 +92,7 @@ def charger_donnees_json_de_url(base_url):
 
     while offset < total_count:
         limit = min(LIMIT, total_count - offset)
-        url = f"{base_url}?limit={limit}&offset={offset}"
+        url = f"{BASE_URL}?limit={limit}&offset={offset}"
         try:
             reponse = requests.get(url)
             print(f"Requête HTTP vers {url}, code de réponse : {reponse.status_code}")
@@ -92,7 +120,7 @@ def charger_donnees_json_de_url(base_url):
         if item_id in id_info_dict:
             item.update(id_info_dict[item_id])
 
-    print(f"Données chargées depuis {base_url}, {len(all_data)} éléments")
+    print(f"Données chargées depuis {BASE_URL}, {len(all_data)} éléments")
 
     os.makedirs(CACHE_FOLDER, exist_ok=True)
     try:
@@ -103,9 +131,8 @@ def charger_donnees_json_de_url(base_url):
         print(f"Erreur lors de la sauvegarde des données dans le cache : {e}")
 
     return all_data
+if __name__ == '__main__':
+    # Données json
+    donnees_json_de_url = charger_donnees_json_de_url(BASE_URL)
 
-# Données json
-base_url = "https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records"
-donnees_json_de_url = charger_donnees_json_de_url(base_url)
-
-subprocess.run(["python", "db/import_db.py"])
+    subprocess.run(["python", "db/import_db.py"])
