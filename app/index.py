@@ -25,6 +25,7 @@ def cache_hit(cacheFichier):
         print("Le cache a expiré.")
         return False
     return True
+
 def get_total_count():
     url = f"{BASE_URL}?limit=1&offset=0"
     try:
@@ -37,7 +38,6 @@ def get_total_count():
     return total_count
 
 def get_stations(url):
-
     try:
         reponse = requests.get(url)
         print(f"Requête HTTP vers {url}, code de réponse : {reponse.status_code}")
@@ -49,12 +49,13 @@ def get_stations(url):
     except Exception as e:
         raise RuntimeError(f"Erreur lors de la requête HTTP : {e}")
     return donnees_json
+
 def charger_noms_stations():
     df = pd.read_csv(STATIONS_WITH_NAME_FILE)
     id_info_dict = {str(row['ID']): {'marque': row['Marque'], 'nom': row['Nom']} for _, row in df.iterrows()}
     return id_info_dict
-def write_cache(cacheFichier, all_data):
 
+def write_cache(cacheFichier, all_data):
     os.makedirs(CACHE_FOLDER, exist_ok=True)
     try:
         with open(cacheFichier, 'w', encoding='utf-8') as fichier_cache:
@@ -75,24 +76,38 @@ def charger_donnees_json_de_url(base_url):
                 return donnees_json
         except Exception as e:
             print(f"Erreur lors du chargement des données depuis le cache : {e}")
+
     offset = 0
     all_data = []
     total_count = get_total_count()
     print(f"Nombre total d'enregistrements : {total_count}")
+
     while offset < total_count:
         limit = min(LIMIT, total_count - offset)
+
+        # Vérifier si offset + limit dépasse la limite imposée par l'API (10000 dans votre cas)
+        if offset + limit > 10000:
+            limit = 10000 - offset  # Réduire limit pour respecter la limite de l'API
+
         url = f"{BASE_URL}?limit={limit}&offset={offset}"
-        donnees_json = get_stations(url)
-        all_data.extend(donnees_json)
-        offset += len(donnees_json)
-        id_info_dict = charger_noms_stations()
-        for item in all_data:
-            item_id = str(item['id'])
-            if item_id in id_info_dict:
-                item.update(id_info_dict[item_id])
-                print(f"Données chargées depuis {base_url}, {len(all_data)} éléments")
-                write_cache(cacheFichier, all_data)
-                return all_data
+        try:
+            donnees_json = get_stations(url)
+            all_data.extend(donnees_json)
+            offset += len(donnees_json)
+        except RuntimeError as e:
+            print(f"Erreur lors de la récupération des données depuis {url}: {e}")
+            break
+
+    id_info_dict = charger_noms_stations()
+    for item in all_data:
+        item_id = str(item['id'])
+        if item_id in id_info_dict:
+            item.update(id_info_dict[item_id])
+
+    print(f"Données chargées depuis {base_url}, {len(all_data)} éléments")
+    write_cache(cacheFichier, all_data)
+    return all_data
+
 
 if __name__ == "__main__":
     donnees_json_de_url = charger_donnees_json_de_url(BASE_URL)
