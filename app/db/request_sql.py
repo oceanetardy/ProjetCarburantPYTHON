@@ -71,7 +71,7 @@ def generate_carburant_plot(carburant_info, output_folder):
     plt.tight_layout()
 
     plot_path = os.path.join(output_folder, 'carburant_avg_prices.png')
-    plt.savefig(plot_path)
+    plt.savefig(plot_path, transparent=True)
     plt.close()
 
     return plot_path
