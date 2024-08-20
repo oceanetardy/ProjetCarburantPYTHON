@@ -3,7 +3,6 @@ import json
 import requests
 import pandas as pd
 from datetime import datetime, timedelta
-import pytz
 import subprocess
 
 # Constants
