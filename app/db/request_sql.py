@@ -1,10 +1,5 @@
-import os
 import sqlite3
-import matplotlib.pyplot as plt
 import re
-
-
-
 
 def get_carburant_info(db_path):
     conn = sqlite3.connect(db_path)
@@ -78,11 +73,11 @@ def generate_carburant_plot(carburant_info, output_folder):
     # Ajouter le prix moyen au-dessus de chaque barre
     for bar, price in zip(bars, avg_prices):
         plt.text(
-            bar.get_x() + bar.get_width() / 2,  # Position x
-            bar.get_height(),  # Position y (au-dessus de la barre)
-            f'{price:.2f} €',  # Texte affiché (prix formaté avec 2 décimales)
-            ha='center',  # Alignement horizontal
-            va='bottom'  # Alignement vertical
+            bar.get_x() + bar.get_width() / 2,
+            bar.get_height(),
+            f'{price:.2f} €',
+            ha='center',
+            va='bottom'
         )
 
     plot_path = os.path.join(output_folder, 'carburant_avg_prices.png')
@@ -93,7 +88,7 @@ def generate_carburant_plot(carburant_info, output_folder):
 
 
 
-def search_stations_by_department(db_path, department_code):
+def search_stations_by_postal_code(db_path, department_code):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 

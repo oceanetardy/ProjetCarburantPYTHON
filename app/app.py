@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request
 import os
-from db.request_sql import get_carburant_info, generate_carburant_plot, search_stations_by_department, \
+from db.request_sql import get_carburant_info, generate_carburant_plot, search_stations_by_postal_code, \
     get_carburant_prices_by_postal_code
 
 app = Flask(__name__)
@@ -33,10 +33,7 @@ def findstation():
     if request.method == 'POST':
         postal_code = request.form.get('department')
         if postal_code:
-            # Search stations by department
-            stations = search_stations_by_department(db_path, postal_code)
-
-            # Get carburant prices by postal code
+            stations = search_stations_by_postal_code(db_path, postal_code)
             prices, error_message = get_carburant_prices_by_postal_code(db_path, postal_code)
         else:
             stations = []
@@ -47,8 +44,8 @@ def findstation():
 
     return render_template(
         'findstation.html',
-        logo=logoGasGenius,  # Assuming `logoGasGenius` is defined somewhere in your code
-        gasstation=gasstation,  # Assuming `gasstation` is defined somewhere in your code
+        logo=logoGasGenius,
+        gasstation=gasstation,
         stations=stations,
         prices=prices,
         error=error_message
