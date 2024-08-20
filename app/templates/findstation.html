@@ -1,13 +1,17 @@
 {% extends "base.html" %}
 {% block title %}GasGenius - Rechercher {% endblock %}
 {% block content %}
-<h1>Recherche de Stations</h1>
+
+    <div class="search-station">
+    <h1>Recherche de Stations</h1>
 <form method="POST" action="/rechercher">
     <label for="department">Code postal :</label>
     <input type="text" id="department" name="department" required>
     <button type="submit">Rechercher</button>
 </form>
+    </div>
 
+<div class="result-station">
 {% if stations %}
     <h2>Stations trouvées :</h2>
     <table>
@@ -45,4 +49,6 @@
 {% else %}
     <p>Aucune station trouvée pour le code postal spécifié.</p>
 {% endif %}
+</div>
+
 {% endblock %}
