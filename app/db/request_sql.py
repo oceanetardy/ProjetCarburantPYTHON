@@ -1,6 +1,8 @@
 import os
 import sqlite3
 import matplotlib.pyplot as plt
+import re
+
 
 
 
@@ -106,7 +108,14 @@ def search_stations_by_department(db_path, department_code):
     conn.close()
     return stations
 
+def is_valid_postal_code(postal_code):
+    # Vérifie que le code postal est exactement 5 chiffres
+    return re.fullmatch(r'\d{5}', postal_code) is not None
+
 def get_carburant_prices_by_postal_code(db_path, postal_code):
+    if not is_valid_postal_code(postal_code):
+        return None, "Code postal non valide. Veuillez entrer un code postal à 5 chiffres."
+
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
@@ -133,4 +142,8 @@ def get_carburant_prices_by_postal_code(db_path, postal_code):
     prices = cursor.fetchall()
 
     conn.close()
-    return prices
+
+    if not prices:
+        return None, "Aucune station trouvée pour le code postal spécifié."
+
+    return prices, None

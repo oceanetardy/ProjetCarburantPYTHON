@@ -24,14 +24,20 @@ def statisticNational():
     plot_path = generate_carburant_plot(carburant_info, app.config["PLOT_FOLDER"])
     return render_template('nationalstatistic.html', logo=logoGasGenius, gasstation=gasstation, gaspump=gaspump, carburant_info=carburant_info, plot_path=plot_path)
 
+
 @app.route('/rechercher', methods=['GET', 'POST'])
 def findstation():
     db_path = 'db/stations_data.db'
+    error_message = None
+
     if request.method == 'POST':
         postal_code = request.form.get('department')
         if postal_code:
+            # Search stations by department
             stations = search_stations_by_department(db_path, postal_code)
-            prices = get_carburant_prices_by_postal_code(db_path, postal_code)
+
+            # Get carburant prices by postal code
+            prices, error_message = get_carburant_prices_by_postal_code(db_path, postal_code)
         else:
             stations = []
             prices = []
@@ -39,7 +45,13 @@ def findstation():
         stations = []
         prices = []
 
-    return render_template('findstation.html', logo=logoGasGenius, gasstation=gasstation, stations=stations, prices=prices)
-
+    return render_template(
+        'findstation.html',
+        logo=logoGasGenius,  # Assuming `logoGasGenius` is defined somewhere in your code
+        gasstation=gasstation,  # Assuming `gasstation` is defined somewhere in your code
+        stations=stations,
+        prices=prices,
+        error=error_message
+    )
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
