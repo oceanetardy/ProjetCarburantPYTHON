@@ -4,59 +4,74 @@
 
 <div class="container">
     <div class="row title-row">
-        <h1>Explorez les statistiques nationales</h1>
+        <h1 class="text-center">Explorez les statistiques nationales</h1>
     </div>
 
     {% if carburant_info %}
         {% for carburant, info in carburant_info.items() %}
-        <div class="row">
-            <div class="col-md-4">
-                <img src="{{ gaspump }}" alt="Logo GasGenius" class="img-carb">
+        <div class=" box-gas row mb-4 p-3 bg-light rounded shadow-sm ">
+            <div class="col-md-4 text-center box-gas">
+                <img src="{{ gaspump }}" alt="Logo GasGenius" class="img-fluid mb-3" style="max-width: 150px;">
                 <h2>{{ carburant }}</h2>
-                <h3>Prix moyen</h3>
-                <br>
-                {% if info.avg_price %}
-                    {{ info.avg_price }}€
-                {% else %}
-                    Données non disponibles
-                {% endif %}
-                <br>
-                <h3>Prix le plus cher</h3>
-                {% if info.max_price %}
-                    <p>Station: {{ info.max_price[2] }}</p>
-                    <p>Adresse: {{ info.max_price[3] }}, {{ info.max_price[4] }}, {{ info.max_price[5] }}</p>
-                    <p>Prix: {{ info.max_price[1] }}€</p>
-                {% else %}
-                    <p>Données non disponibles</p>
-                {% endif %}
-                <br>
-                <h3>Prix le moins cher</h3>
-                <br>
-                {% if info.min_price %}
-                    <p>Station: {{ info.min_price[2] }}</p>
-                    <p>Adresse: {{ info.min_price[3] }}, {{ info.min_price[4] }}, {{ info.min_price[5] }}</p>
-                    <p>Prix: {{ info.min_price[1] }}€</p>
-                {% else %}
-                    <p>Données non disponibles</p>
-                {% endif %}
-                <br>
-                <h3>Prix moyen</h3>
-                <br>
-                {{ info.avg_price }}€
-                <br>
+            </div>
+            <div class="col-md-8 box-gas">
+                <div class="mb-3">
+                    <h3>Prix moyen</h3>
+                    <p class="lead">
+                        {% if info.avg_price %}
+                            {{ info.avg_price|round(3) }}€
+                        {% else %}
+                            Données non disponibles
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="mb-3">
+                    <h3>Prix le plus cher</h3>
+                    {% if info.max_price %}
+                        <p>Station: <strong>
+                            {% if info.max_price[2] %}
+                                {{ info.max_price[2] }}
+                            {% else %}
+                                Nom de la station non disponible
+                            {% endif %}
+                        </strong></p>
+                        <p>Adresse: {{ info.max_price[3] }}, {{ info.max_price[4] }}, {{ info.max_price[5] }}</p>
+                        <p>Prix: <strong>{{ info.max_price[1]|round(3) }}€</strong></p>
+                    {% else %}
+                        <p>Données non disponibles</p>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <h3>Prix le moins cher</h3>
+                    {% if info.min_price %}
+                        <p>Station: <strong>
+                            {% if info.min_price[2] %}
+                                {{ info.min_price[2] }}
+                            {% else %}
+                                Nom de la station non disponible
+                            {% endif %}
+                        </strong></p>
+                        <p>Adresse: {{ info.min_price[3] }}, {{ info.min_price[4] }}, {{ info.min_price[5] }}</p>
+                        <p>Prix: <strong>{{ info.min_price[1]|round(3) }}€</strong></p>
+                    {% else %}
+                        <p>Données non disponibles</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
         {% endfor %}
     {% else %}
-        <p>Aucune information disponible.</p>
+        <p class="text-center">Aucune information disponible.</p>
     {% endif %}
 
     <div class="row">
-        {% if plot_path %}
-            <img src="{{ plot_path }}" alt="Graphique des prix moyens des carburants" class="img-stats">
-        {% else %}
-            <p>Graphique non disponible.</p>
-        {% endif %}
+        <div class="col text-center">
+            {% if plot_path %}
+                <img src="{{ plot_path }}" alt="Graphique des prix moyens des carburants" class="img-fluid img-stats mt-4">
+            {% else %}
+                <p>Graphique non disponible.</p>
+            {% endif %}
+        </div>
     </div>
 </div>
 

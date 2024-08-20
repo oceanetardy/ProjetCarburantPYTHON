@@ -53,6 +53,9 @@ def get_carburant_info(db_path):
     conn.close()
     return carburant_info
 
+import os
+import matplotlib.pyplot as plt
+
 def generate_carburant_plot(carburant_info, output_folder):
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -64,17 +67,28 @@ def generate_carburant_plot(carburant_info, output_folder):
     avg_prices = [price if price is not None else 0 for price in avg_prices]
 
     plt.figure(figsize=(10, 6))
-    plt.bar(carburants, avg_prices, color='skyblue')
+    bars = plt.bar(carburants, avg_prices, color='burlywood')
     plt.xlabel('Carburants')
     plt.ylabel('Prix moyen (€)')
     plt.title('Prix moyen des carburants en France')
     plt.tight_layout()
+
+    # Ajouter le prix moyen au-dessus de chaque barre
+    for bar, price in zip(bars, avg_prices):
+        plt.text(
+            bar.get_x() + bar.get_width() / 2,  # Position x
+            bar.get_height(),  # Position y (au-dessus de la barre)
+            f'{price:.2f} €',  # Texte affiché (prix formaté avec 2 décimales)
+            ha='center',  # Alignement horizontal
+            va='bottom'  # Alignement vertical
+        )
 
     plot_path = os.path.join(output_folder, 'carburant_avg_prices.png')
     plt.savefig(plot_path, transparent=True)
     plt.close()
 
     return plot_path
+
 
 
 def search_stations_by_department(db_path, department_code):
@@ -96,10 +110,9 @@ def get_carburant_prices_by_postal_code(db_path, postal_code):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    # Define a query that fetches the prices for each fuel type
     query = '''
         SELECT 
-            COALESCE(s.nom, 'Station non disponible') AS station_nom, 
+            COALESCE(s.nom, 'Nom de station non disponible') AS station_nom, 
             COALESCE(s.adresse, 'Adresse non disponible') AS adresse, 
             COALESCE(s.ville, 'Ville non disponible') AS ville, 
             COALESCE(s.cp, 'CP non disponible') AS cp,
