@@ -73,9 +73,9 @@ def insert_data_from_json(station_data):
         insert_fuel_prices(cursor, station_data)
 
         conn.commit()
-        print(f"Data for station with ID {station_data['id']} successfully inserted from cache.")
+        print(f"Données pour la station ID {station_data['id']} insérées depuis le cache avec succès.")
     except Exception as e:
-        log_error(f"Error inserting data for station with ID {station_data['id']}: {str(e)}")
+        log_error(f"Erreur lors de l'insertion pour la station ID {station_data['id']}: {str(e)}")
         conn.rollback()
     finally:
         conn.close()
@@ -154,6 +154,6 @@ if os.path.exists(cache_file_path):
     for station_data in json_data_list:
         insert_data_from_json(station_data)
 
-    print("Data successfully inserted into database from cache.")
+    print("Données insérées en BDD depuis le cache avec succès.")
 else:
-    print(f"Cache file {cache_file_path} does not exist.")
+    print(f"Le fichier de cache {cache_file_path} n'existe pas.")
