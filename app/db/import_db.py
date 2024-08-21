@@ -1,10 +1,25 @@
 import sqlite3
 import json
 import os
+import logging
 
 base_dir = os.path.abspath(os.path.dirname(__file__))
 db_path = os.path.join(base_dir, '..', 'db', 'stations_data.db')
 cache_file_path = os.path.join(base_dir, '..', 'cache', 'cache_file.json')
+
+# Configuration du logger
+log_dir = os.path.join(base_dir, '..', 'logs')
+os.makedirs(log_dir, exist_ok=True)
+log_file_path = os.path.join(log_dir, 'error_log.log')
+
+logging.basicConfig(
+    level=logging.ERROR,
+    format='%(asctime)s %(levelname)s %(message)s',
+    handlers=[
+        logging.FileHandler(log_file_path, encoding='utf-8'),
+        logging.StreamHandler()  # Affichage dans la console
+    ]
+)
 
 def create_tables():
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
@@ -143,7 +158,7 @@ def insert_fuel_prices(cursor, station_data):
                                prix_values)
 
 def log_error(message):
-    print(message)
+    logging.error(message)
 
 if os.path.exists(cache_file_path):
     with open(cache_file_path, 'r', encoding='utf-8') as file:
